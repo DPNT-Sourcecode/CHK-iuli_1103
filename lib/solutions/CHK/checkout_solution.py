@@ -1,45 +1,12 @@
 from collections import Counter
 import re
-class Specials:
-    def __init__(self):
-        self.items = dict()
-
-    def add_special(self, key, value):
-        self.items[key] = value
-
-    def get_special(self, key, value):
-        if key in self.items:
-            ret = []
-            for v in self.items[key]:
-                covered = v[0] // int(value)
-                if covered > 0:
-                    ret.append(v[1])
-            return ret
-        else:
-            return []
-
-class FreeSpecial(Specials):
-    def __init__(self):
-        super().__init__()
-
-    def get_special(self, key, value):
-        if key in self.items:
-            ret = []
-            for v in self.items[key]:
-                covered = v[0] // int(value)
-                if covered > 0:
-                    ret.append(v[1])
-            return ret
-        else:
-            return []
-
 class Offer:
-    def __init__(self, item, price):
+    def __init__(self, item, price, special):
         self.item = item
         self.price = price
+        self.special = special
 
-    def get_total(self, amount, specials):
-        special = specials.get_special(self.item, amount)
+    def get_total(self, amount):
         if self.special == "":
             return self.price * amount
         else:
@@ -72,20 +39,11 @@ class Offers:
 # noinspection PyUnusedLocal
 # skus = unicode string
 
-specials = Specials()
-
-specials.add_special("A", [(5, 200), (3, 130)])
-specials.add_special("B", [(2, 45)])
-
-free_specials = FreeSpecial()
-free_specials.add_special("E", [(2, "B")])
-
 offers = Offers()
-offers.add_item(Offer("A", 50))
-offers.add_item(Offer("B", 30))
-offers.add_item(Offer("C", 20))
-offers.add_item(Offer("D", 15))
-offers.add_item(Offer("E", 40))
+offers.add_item(Offer("A", 50, "3A for 130"))
+offers.add_item(Offer("B", 30, "2B for 45"))
+offers.add_item(Offer("C", 20, ""))
+offers.add_item(Offer("D", 15, ""))
 
 
 def checkout(skus):
@@ -97,27 +55,9 @@ def checkout(skus):
 
     counted = Counter(skus)
     total = 0
-
-    free_items = []
-    for k in counted:
-        fs = free_specials.get_special(k, counted[k])
-        free_items += fs
-
-    for fi in free_items:
-        if fi in counted and counted[fi] > 0:
-            counted[fi] -= 1
-
     for k in counted:
         offer = offers.get_offer(k)
         if offer:
-            total += offer.get_total(int(counted[k]), specials)
+            total += offer.get_total(int(counted[k]))
 
     return total
-
-
-# print(checkout("AAAAAAAABCDEE"))
-
-
-
-
-
